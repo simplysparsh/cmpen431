@@ -41,11 +41,19 @@ void  setSizesOffsetsAndMaskFields(cache* acache, unsigned int size, unsigned in
 
 
 unsigned long long getindex(cache* acache, unsigned long long address){
-  return 0; //Replace with correct value
+  for (int i = 0; i < acache->BO; i++){
+    address = address >> 1;
+  }
+
+  return address & acache->VAImask;
 }
 
 unsigned long long gettag(cache* acache, unsigned long long address){
-  return 0; //Replace with correct value
+  for (int i = 0; i < acache->TO; i++){
+    address = address >> 1;
+  }
+
+  return address & acache->VATmask;
 }
 
 void writeback(cache* acache, unsigned int index, unsigned int oldestway){
