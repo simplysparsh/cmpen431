@@ -34,9 +34,11 @@ void  setSizesOffsetsAndMaskFields(cache* acache, unsigned int size, unsigned in
   acache->VAImask = (1<<acache->VAImask)-1;
 
   acache->VATmask = 0;
-  n = blocksize*acache->numsets;
+  n = blocksize*(acache->numsets);
   while(n>>=1) ++acache->VATmask;
+  acache->VATmask = 64 - acache->VATmask;
   acache->VATmask = (1<<acache->VATmask)-1;
+
 }
 
 
@@ -60,15 +62,23 @@ void writeback(cache* acache, unsigned int index, unsigned int oldestway){
   // YOUR CODE GOES HERE
   unsigned long long address = 0;
   unsigned long long tag = 0;
+  const int word_size = 8;
   tag = acache->sets[index].blocks[oldestway].tag;
   address = (tag << acache->TO) + (index << acache->BO);
 
-  for(int i = 0; i < (acache->blocksize/8); i++){
-    performaccess(acache->nextcache, (8*i+address), 8, 1, acache->sets[index].blocks[oldestway].datawords[i], 0);
+  for(int i = 0; i < (acache->blocksize/word_size); i++){
+    performaccess(acache->nextcache, (word_size*i+address), 8, 1, acache->sets[index].blocks[oldestway].datawords[i], i);
   }
 }
 
 void fill(cache * acache, unsigned int index, unsigned int oldestway, unsigned long long address){
-  // YOUR CODE GOES HERE
+   //YOUR CODE GOES HERE
+  unsigned long long base_address = (address/acache->blocksize)*acache->blocksize;
+  unsigned long long value = 0;
+  const int word_size = 8;
+  for(int i = 0; i < (acache->blocksize/word_size); i++){
+    value = performaccess(acache->nextcache, (word_size*i+base_address), 8, 0, 0, i);
+    acache->sets[index].blocks[oldestway].datawords[i]= value;
+  }
 
 }
