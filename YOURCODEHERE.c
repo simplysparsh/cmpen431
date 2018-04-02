@@ -58,7 +58,14 @@ unsigned long long gettag(cache* acache, unsigned long long address){
 
 void writeback(cache* acache, unsigned int index, unsigned int oldestway){
   // YOUR CODE GOES HERE
+  unsigned long long address = 0;
+  unsigned long long tag = 0;
+  tag = acache->sets[index].blocks[oldestway].tag;
+  address = (tag << acache->TO) + (index << acache->BO);
 
+  for(int i = 0; i < (acache->blocksize/8); i++){
+    performaccess(acache->nextcache, (8*i+address), 8, 1, acache->sets[index].blocks[oldestway].datawords[i], 0);
+  }
 }
 
 void fill(cache * acache, unsigned int index, unsigned int oldestway, unsigned long long address){
