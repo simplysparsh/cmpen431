@@ -32,12 +32,7 @@ void  setSizesOffsetsAndMaskFields(cache* acache, unsigned int size, unsigned in
   n = acache->numsets;
   while(n>>=1) ++acache->VAImask;
   acache->VAImask = (1<<acache->VAImask)-1;
-
-  acache->VATmask = 0;
-  n = blocksize*(acache->numsets);
-  while(n>>=1) ++acache->VATmask;
-  acache->VATmask = 64 - acache->VATmask;
-  acache->VATmask = (1<<acache->VATmask)-1;
+  acache->VATmask = ~(0);
 
 }
 
@@ -56,6 +51,7 @@ unsigned long long gettag(cache* acache, unsigned long long address){
   }
 
   return address & acache->VATmask;
+
 }
 
 void writeback(cache* acache, unsigned int index, unsigned int oldestway){
@@ -65,6 +61,7 @@ void writeback(cache* acache, unsigned int index, unsigned int oldestway){
   const int word_size = 8;
   tag = acache->sets[index].blocks[oldestway].tag;
   address = (tag << acache->TO) + (index << acache->BO);
+
 
   for(int i = 0; i < (acache->blocksize/word_size); i++){
     performaccess(acache->nextcache, (word_size*i+address), 8, 1, acache->sets[index].blocks[oldestway].datawords[i], i);
@@ -80,5 +77,4 @@ void fill(cache * acache, unsigned int index, unsigned int oldestway, unsigned l
     value = performaccess(acache->nextcache, (word_size*i+base_address), 8, 0, 0, i);
     acache->sets[index].blocks[oldestway].datawords[i]= value;
   }
-
 }
